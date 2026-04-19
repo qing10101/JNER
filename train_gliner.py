@@ -14,7 +14,7 @@ Install dependencies before running:
   pip install -r requirements.txt
 
 Usage:
-  python train_gliner.py [--epochs 10] [--batch-size 8] [--model urchade/gliner_largev2.1]
+  python train_gliner.py [--epochs 10] [--batch-size 8] [--model urchade/gliner_large-v2.1]
 """
 
 import argparse
@@ -430,7 +430,7 @@ def _make_ner_callback(eval_data: List[Dict], labels: List[str], output_dir: Pat
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Train GLiNER on biomedical + review NER data")
-    p.add_argument("--model", default="urchade/gliner_largev2.1",
+    p.add_argument("--model", default="urchade/gliner_large-v2.1",
                    help="HuggingFace model ID to fine-tune (default: numind/NuNER_Zero-span)")
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--batch-size", type=int, default=8)
