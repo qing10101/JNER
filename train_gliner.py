@@ -14,7 +14,7 @@ Install dependencies before running:
   pip install -r requirements.txt
 
 Usage:
-  python train_gliner.py [--epochs 5] [--batch-size 8] [--model numind/NuNER_Zero-span]
+  python train_gliner.py [--epochs 10] [--batch-size 8] [--model numind/NuNER_Zero-span]
 """
 
 import argparse
