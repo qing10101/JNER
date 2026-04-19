@@ -62,8 +62,6 @@ def _is_minor_age(span_text: str) -> bool:
 MACCROBAT_LABEL_MAP = {
     "Sign_symptom":          "MedicalCondition",
     "Disease_disorder":      "MedicalCondition",
-    "Frequency":             "MedicalCondition",
-    "Duration":              "MedicalCondition",
     "Diagnostic_procedure":  "ClinicalProcedure",
     "Therapeutic_procedure": "ClinicalProcedure",
     "Clinical_event":        "ClinicalEvent",

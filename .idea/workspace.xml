@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58264430-28cb-4197-9cb1-a69df44db2e8" name="Changes" comment="change default model" />
+    <list default="true" id="58264430-28cb-4197-9cb1-a69df44db2e8" name="Changes" comment="change default model">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_gliner.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_gliner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_spacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_spacy.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -94,7 +99,23 @@
       <option name="project" value="LOCAL" />
       <updated>1776567008653</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="change default model">
+      <option name="closed" value="true" />
+      <created>1776567399128</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1776567399128</updated>
+    </task>
+    <task id="LOCAL-00006" summary="change default model">
+      <option name="closed" value="true" />
+      <created>1776567632425</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1776567632425</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

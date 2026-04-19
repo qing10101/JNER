@@ -1,6 +1,6 @@
 # JNER — Training Scripts
 
-NER training pipeline for detecting **minor children**, **gender indications**, and **biomedical entities** in text. Two model backends are provided: [GLiNER](https://github.com/urchade/GLiNER) (transformer-based, retains zero-shot generalization) and [spaCy](https://spacy.io/) (lighter, faster, fixed-label only).
+NER training pipeline for detecting **minor children**, **gender indications**, and **biomedical entities** in text. Three model backends are provided: [GLiNER](https://github.com/urchade/GLiNER) (transformer-based, retains zero-shot generalization), [SpanMarker](https://github.com/tomaarsen/SpanMarkerNER) (BERT span classifier, higher accuracy on fixed labels), and [spaCy](https://spacy.io/) (lighter, faster, fixed-label only).
 
 ---
 
@@ -43,16 +43,14 @@ Internal annotation file with columns:
 ## Installation
 
 ```bash
-pip install -r requirements.txt
+# GLiNER backend:
+pip install -r requirements-gliner.txt
 
-# spaCy backend (choose one):
-python -m spacy download en_core_web_lg       # CNN, faster
-python -m spacy download en_core_web_trf      # transformer, better for implicit entities
-pip install spacy-transformers                 # required for en_core_web_trf
+# SpanMarker backend:
+pip install -r requirements-spanmarker.txt
 
-# Optional — better biomedical tokenisation for spaCy:
-pip install scispacy
-pip install https://s3-us-west-2.amazonaws.com/ai2-s2-scispacy/releases/v0.5.4/en_core_sci_lg-0.5.4.tar.gz
+# spaCy backend:
+pip install -r requirements-spacy.txt
 ```
 
 ---
@@ -69,10 +67,10 @@ python train_gliner.py [options]
 
 | Argument | Default | Description |
 |---|---|---|
-| `--model` | `numind/NuNER_Zero-span` | HuggingFace model ID |
-| `--epochs` | `5` | Number of training epochs |
+| `--model` | `EmergentMethods/gliner_medium_news-v2.1` | HuggingFace model ID |
+| `--epochs` | `10` | Number of training epochs |
 | `--batch-size` | `8` | Batch size |
-| `--lr` | `1e-5` | Learning rate |
+| `--lr` | `3e-5` | Learning rate |
 | `--output-dir` | `gliner_finetuned` | Output directory |
 | `--seed` | `42` | Random seed |
 | `--val-split` | `0.1` | Fraction held out for validation |
@@ -89,6 +87,36 @@ python train_gliner.py [options]
 
 ---
 
+### `train_spanmarker.py` — SpanMarker backend
+
+Fine-tunes a SpanMarker span classifier on all three data sources. Uses direct BIO supervision rather than contrastive learning, which typically yields higher F1 on fixed label sets. Automatically saves the best checkpoint by `eval_overall_f1`.
+
+```bash
+python train_spanmarker.py [options]
+```
+
+| Argument | Default | Description |
+|---|---|---|
+| `--model` | `microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext` | HuggingFace encoder model ID |
+| `--epochs` | `5` | Number of training epochs |
+| `--batch-size` | `8` | Batch size |
+| `--lr` | `5e-5` | Learning rate |
+| `--output-dir` | `spanmarker_finetuned` | Output directory |
+| `--seed` | `42` | Random seed |
+| `--val-split` | `0.1` | Fraction held out for validation |
+| `--data-dir` | `9764942/` | Directory containing MACCROBAT subdirs |
+| `--corona` | `Corona2.json` | Path to Corona2.json |
+| `--csv` | `mydata.csv` | Path to mydata.csv |
+| `--minor-oversample` | `2` | Extra copies of MinorChild CSV examples to counter class imbalance |
+| `--entity-max-length` | `8` | Max tokens per entity span |
+| `--model-max-length` | `256` | Max input sequence length |
+
+**Outputs:**
+- `spanmarker_finetuned/best/` — checkpoint with highest `eval_overall_f1`
+- `spanmarker_finetuned/final/` — last epoch checkpoint
+
+---
+
 ### `train_spacy.py` — spaCy backend
 
 Trains a spaCy NER model on all three data sources in a single pass. The output model recognizes **only** the five labels above — base model generalist NER (PERSON, ORG, etc.) is not retained.
@@ -99,7 +127,7 @@ python train_spacy.py [options]
 
 | Argument | Default | Description |
 |---|---|---|
-| `--model` | `en_core_web_lg` | spaCy base model |
+| `--model` | `en_core_sci_lg` | spaCy base model (requires scispacy) |
 | `--epochs` | `10` | Number of training epochs |
 | `--batch-size` | `8` | Batch size |
 | `--dropout` | `0.2` | Dropout rate |
@@ -136,10 +164,11 @@ mydata.csv rows with a non-empty `medical_col` are excluded from training. Inclu
 ### MinorChild oversampling
 `MedicalCondition` and `ClinicalProcedure` appear many times per clinical document, while `MinorChild` is rare. `--minor-oversample` (default `2`) duplicates MinorChild-containing CSV examples before training to partially compensate.
 
-### GLiNER vs. spaCy
-| | GLiNER | spaCy |
-|---|---|---|
-| Architecture | Transformer span model | CNN / Transformer token classifier |
-| Generalist NER after fine-tuning | Retained | Lost |
-| Inference speed | Slower | Faster |
-| Implicit/subtle entity detection | Better | Weaker (use `en_core_web_trf` to improve) |
+### Backend comparison
+| | GLiNER | SpanMarker | spaCy |
+|---|---|---|---|
+| Architecture | Transformer span model | BERT span classifier | CNN / Transformer token classifier |
+| Generalist NER after fine-tuning | Retained | Lost | Lost |
+| Inference speed | Slow | Medium | Fast |
+| F1 on fixed labels | ~0.60 | ~0.80 | ~0.71 |
+| Implicit/subtle entity detection | Better | Better | Weaker |
