@@ -4,12 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58264430-28cb-4197-9cb1-a69df44db2e8" name="Changes" comment="change default model">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_gliner.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_gliner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_spacy.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_spacy.py" afterDir="false" />
-    </list>
+    <list default="true" id="58264430-28cb-4197-9cb1-a69df44db2e8" name="Changes" comment="add llm training feature" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -115,13 +110,42 @@
       <option name="project" value="LOCAL" />
       <updated>1776567632425</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="add spanmarker model">
+      <option name="closed" value="true" />
+      <created>1776620537572</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1776620537572</updated>
+    </task>
+    <task id="LOCAL-00008" summary="add llm training feature">
+      <option name="closed" value="true" />
+      <created>1776637074048</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1776637074049</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="initial commit" />
     <MESSAGE value="modify README.md" />
     <MESSAGE value="change default model" />
-    <option name="LAST_COMMIT_MESSAGE" value="change default model" />
+    <MESSAGE value="add spanmarker model" />
+    <MESSAGE value="add llm training feature" />
+    <option name="LAST_COMMIT_MESSAGE" value="add llm training feature" />
   </component>
 </project>

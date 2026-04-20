@@ -145,8 +145,9 @@ def _inject_minor_pronouns(
     return entities + extra, len(extra)
 
 
-def parse_ann(ann_path: Path) -> List[Tuple[int, int, str]]:
+def parse_ann(ann_path: Path, text: str) -> List[Tuple[int, int, str]]:
     entities: List[Tuple[int, int, str]] = []
+    sex_spans: List[Tuple[int, int]] = []
     for line in ann_path.read_text(encoding="utf-8").splitlines():
         if not line.startswith("T"):
             continue
@@ -162,6 +163,8 @@ def parse_ann(ann_path: Path) -> List[Tuple[int, int, str]]:
             if not _is_minor_age(span_text):
                 continue
             mapped = "MinorChild"
+        elif label == "Sex":
+            mapped = None
         elif label in MACCROBAT_LABEL_MAP:
             mapped = MACCROBAT_LABEL_MAP[label]
         else:
@@ -172,7 +175,23 @@ def parse_ann(ann_path: Path) -> List[Tuple[int, int, str]]:
             char_end = int(raw_end.split(";")[-1]) if ";" in raw_end else int(raw_end)
         except ValueError:
             continue
-        entities.append((char_start, char_end, mapped))
+        if mapped is None:
+            sex_spans.append((char_start, char_end))
+        else:
+            entities.append((char_start, char_end, mapped))
+    # Extend MinorChild spans to absorb an immediately adjacent Sex token so
+    # span boundaries match mydata.csv, which labels the full noun phrase
+    # (e.g. "16-year-old boy") rather than just the age fragment ("16-year-old").
+    if sex_spans:
+        merged = []
+        for cs, ce, lbl in entities:
+            if lbl == "MinorChild":
+                for ss, se in sex_spans:
+                    if 0 < ss - ce <= 2 and text[ce:ss].strip() == "":
+                        ce = se
+                        break
+            merged.append((cs, ce, lbl))
+        return merged
     return entities
 
 
@@ -194,7 +213,7 @@ def load_maccrobat(root: Path) -> List[Dict]:
             tokens, token_spans = tokenize(text)
             if not tokens:
                 continue
-            char_entities = parse_ann(ann_file)
+            char_entities = parse_ann(ann_file, text)
             char_entities, n_injected = _inject_minor_pronouns(text, char_entities)
             if n_injected > 0:
                 docs_with_minor += 1

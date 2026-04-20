@@ -155,6 +155,9 @@ Both scripts train on MACCROBAT + Corona2 + mydata.csv in one combined pass. Spl
 ### MinorChild pronoun injection (MACCROBAT)
 Clinical case reports are single-patient documents. When a document contains an `Age < 18` annotation, all third-person singular pronouns (`he`, `she`, `his`, `her`, `him`) and noun phrases (`the child`, `the patient`, `the boy`, etc.) are automatically labeled `MinorChild`. Plural pronouns (`they`, `them`, `their`) are excluded as they typically refer to the medical team or family members.
 
+### MinorChild Sex-span absorption (MACCROBAT)
+MACCROBAT annotates age and sex as two separate spans — e.g., `"16-year-old"` (label `Age`) and `"boy"` (label `Sex`). mydata.csv, by contrast, labels the full noun phrase as a single `MinorChild` span (e.g., `"4 year old son"`). To align span boundaries across datasets, `parse_ann` absorbs an immediately adjacent `Sex` span into the `MinorChild` span when the two are separated by pure whitespace (≤ 2 characters). A comma, newline, or any non-whitespace character between them prevents the merge.
+
 ### MACCROBAT deduplication
 MACCROBAT2018 and MACCROBAT2020 contain identical files. Only MACCROBAT2018 is loaded to avoid training on duplicate documents.
 
@@ -169,6 +172,16 @@ mydata.csv rows with a non-empty `medical_col` are excluded from training. Inclu
 |---|---|---|---|
 | Architecture | Transformer span model | BERT span classifier | CNN / Transformer token classifier |
 | Generalist NER after fine-tuning | Retained | Lost | Lost |
-| Inference speed | Slow | Medium | Fast |
-| F1 on fixed labels | ~0.60 | ~0.80 | ~0.71 |
+| Inference speed | Medium | Medium | Fast |
+| F1 on fixed labels | ~0.60 | 0.801 | 0.738 |
 | Implicit/subtle entity detection | Better | Better | Weaker |
+
+**spaCy per-label (en_core_sci_lg, F1=0.738 P=0.746 R=0.729):**
+
+| Label | F1 |
+|---|---|
+| MinorChild | 0.933 |
+| GenderIndication | 0.923 |
+| ClinicalEvent | 0.708 |
+| ClinicalProcedure | 0.673 |
+| MedicalCondition | 0.635 |
