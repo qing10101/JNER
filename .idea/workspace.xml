@@ -4,8 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58264430-28cb-4197-9cb1-a69df44db2e8" name="Changes" comment="training methodology update">
+    <list default="true" id="58264430-28cb-4197-9cb1-a69df44db2e8" name="Changes" comment="add minor and gender only training">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minor_gender_only/evaluate_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/minor_gender_only/evaluate_csv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minor_gender_only/train_gliner_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/minor_gender_only/train_gliner_csv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minor_gender_only/train_llm_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/minor_gender_only/train_llm_csv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minor_gender_only/train_spacy_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/minor_gender_only/train_spacy_csv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minor_gender_only/train_spanmarker_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/minor_gender_only/train_spanmarker_csv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_gliner.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_llm.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_spacy.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_spanmarker.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -136,7 +145,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776720025264</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="add minor and gender only training">
+      <option name="closed" value="true" />
+      <created>1776814049053</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1776814049053</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -157,6 +174,7 @@
     <MESSAGE value="add spanmarker model" />
     <MESSAGE value="add llm training feature" />
     <MESSAGE value="training methodology update" />
-    <option name="LAST_COMMIT_MESSAGE" value="training methodology update" />
+    <MESSAGE value="add minor and gender only training" />
+    <option name="LAST_COMMIT_MESSAGE" value="add minor and gender only training" />
   </component>
 </project>

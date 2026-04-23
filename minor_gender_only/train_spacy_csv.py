@@ -2,7 +2,7 @@
 """
 Train a spaCy NER model on mydata.csv only.
 
-Labels: MinorChild, GenderIndication
+Labels: NonfictionalChildRelated, AuthorGenderIndication
 
 Install:
   pip install spacy
@@ -24,15 +24,16 @@ import spacy
 from spacy.training import Example
 from spacy.util import filter_spans, minibatch
 
-ALL_LABELS = {"MinorChild", "GenderIndication"}
+ALL_LABELS = {"NonfictionalChildRelated", "AuthorGenderIndication"}
 
 
 def _find_all_spans(text: str, phrase: str) -> List[Tuple[int, int]]:
-    lower_phrase = phrase.lower().strip()
+    lower_phrase = phrase.lower().strip().replace("\u2019", "'").replace("\u2018", "'")
     if not lower_phrase:
         return []
-    pattern = re.compile(r"\b" + re.escape(lower_phrase) + r"\b", re.IGNORECASE)
-    return [(m.start(), m.end()) for m in pattern.finditer(text)]
+    norm_text = text.replace("\u2019", "'").replace("\u2018", "'")
+    pattern = re.compile(r"(?<![a-zA-Z0-9])" + re.escape(lower_phrase) + r"(?![a-zA-Z0-9])", re.IGNORECASE)
+    return [(m.start(), m.end()) for m in pattern.finditer(norm_text)]
 
 
 def _parse_cell(cell: str) -> List[str]:
@@ -41,6 +42,7 @@ def _parse_cell(cell: str) -> List[str]:
 
 def load_csv(csv_path: Path) -> List[Tuple[str, Dict]]:
     data = []
+    empty = []
     with csv_path.open(encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -50,17 +52,19 @@ def load_csv(csv_path: Path) -> List[Tuple[str, Dict]]:
             minor_cell = row.get("minor_col", "").strip()
             gender_cell = row.get("gender_col", "").strip()
             if not minor_cell and not gender_cell:
+                empty.append((review, {"entities": []}))
                 continue
             entities = []
             for phrase in _parse_cell(minor_cell):
                 for cs, ce in _find_all_spans(review, phrase):
-                    entities.append((cs, ce, "MinorChild"))
+                    entities.append((cs, ce, "NonfictionalChildRelated"))
             for phrase in _parse_cell(gender_cell):
                 for cs, ce in _find_all_spans(review, phrase):
-                    entities.append((cs, ce, "GenderIndication"))
+                    entities.append((cs, ce, "AuthorGenderIndication"))
             if entities:
                 data.append((review, {"entities": entities}))
-    return data
+    n_empty = min(len(empty), len(data))
+    return data + empty[:n_empty]
 
 
 def make_examples(nlp, data: List[Tuple[str, Dict]]) -> List[Example]:
@@ -102,7 +106,7 @@ def print_scores(epoch: int, n_epochs: int, loss: float, scores: Dict) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Train spaCy NER on mydata.csv (MinorChild + GenderIndication)")
+    p = argparse.ArgumentParser(description="Train spaCy NER on mydata.csv (NonfictionalChildRelated + AuthorGenderIndication)")
     p.add_argument("--model", default="en_core_web_lg")
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--batch-size", type=int, default=8)
@@ -111,7 +115,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--val-split", type=float, default=0.1)
     p.add_argument("--csv", default=None, help="Path to mydata.csv (default: mydata.csv next to the script).")
-    p.add_argument("--minor-oversample", type=int, default=2)
+    p.add_argument("--minor-oversample", type=int, default=0)
+    p.add_argument("--gender-oversample", type=int, default=0)
     p.add_argument("--use-gpu", action="store_true")
     return p.parse_args()
 
@@ -119,8 +124,8 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     base_dir = Path(__file__).parent
-    output_dir = base_dir / args.output_dir
-    output_dir.mkdir(exist_ok=True)
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     csv_path = Path(args.csv) if args.csv else base_dir / "mydata.csv"
 
@@ -132,12 +137,13 @@ def main() -> None:
 
     print(f"Loading {csv_path.name} …")
     csv_data = load_csv(csv_path)
-    minor_count = sum(1 for _, ann in csv_data if any(e[2] == "MinorChild" for e in ann["entities"]))
-    gender_count = sum(1 for _, ann in csv_data if any(e[2] == "GenderIndication" for e in ann["entities"]))
-    print(f"  {len(csv_data)} annotated examples  (MinorChild: {minor_count}, GenderIndication: {gender_count})")
+    minor_count = sum(1 for _, ann in csv_data if any(e[2] == "NonfictionalChildRelated" for e in ann["entities"]))
+    gender_count = sum(1 for _, ann in csv_data if any(e[2] == "AuthorGenderIndication" for e in ann["entities"]))
+    print(f"  {len(csv_data)} annotated examples  (NonfictionalChildRelated: {minor_count}, AuthorGenderIndication: {gender_count})")
 
-    minor_data = [d for d in csv_data if any(e[2] == "MinorChild" for e in d[1]["entities"])]
-    all_data = csv_data + minor_data * args.minor_oversample
+    minor_data = [d for d in csv_data if any(e[2] == "NonfictionalChildRelated" for e in d[1]["entities"])]
+    gender_data = [d for d in csv_data if any(e[2] == "AuthorGenderIndication" for e in d[1]["entities"])]
+    all_data = csv_data + minor_data * args.minor_oversample + gender_data * args.gender_oversample
     random.seed(args.seed)
     random.shuffle(all_data)
     n_val = max(1, int(len(all_data) * args.val_split))

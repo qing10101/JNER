@@ -2,7 +2,7 @@
 """
 Train a GLiNER model on mydata.csv only.
 
-Labels: MinorChild, GenderIndication
+Labels: NonfictionalChildRelated, AuthorGenderIndication
 
 Install:
   pip install gliner torch
@@ -22,7 +22,7 @@ from typing import Dict, List, Optional, Tuple
 
 import torch
 
-ALL_LABELS = sorted(["MinorChild", "GenderIndication"])
+ALL_LABELS = sorted(["NonfictionalChildRelated", "AuthorGenderIndication"])
 
 
 def tokenize(text: str) -> Tuple[List[str], List[Tuple[int, int]]]:
@@ -69,46 +69,60 @@ def chunk_examples(examples: List[Dict], max_words: int = 150) -> List[Dict]:
 
 
 def _find_all_spans(text: str, phrase: str) -> List[Tuple[int, int]]:
-    lower_phrase = phrase.lower().strip()
+    lower_phrase = phrase.lower().strip().replace("\u2019", "'").replace("\u2018", "'")
     if not lower_phrase:
         return []
-    pattern = re.compile(r"\b" + re.escape(lower_phrase) + r"\b", re.IGNORECASE)
-    return [(m.start(), m.end()) for m in pattern.finditer(text)]
+    norm_text = text.replace("\u2019", "'").replace("\u2018", "'")
+    pattern = re.compile(r"(?<![a-zA-Z0-9])" + re.escape(lower_phrase) + r"(?![a-zA-Z0-9])", re.IGNORECASE)
+    return [(m.start(), m.end()) for m in pattern.finditer(norm_text)]
 
 
 def _parse_cell(cell: str) -> List[str]:
     return [s.strip() for s in cell.split(";") if s.strip()]
 
 
+def _resolve_overlaps(ner: List[List]) -> List[List]:
+    """Keep longest span when token ranges overlap; ties broken by earlier start."""
+    sorted_spans = sorted(ner, key=lambda x: (-(x[1] - x[0]), x[0]))
+    kept = []
+    for s, e, lbl in sorted_spans:
+        if not any(s <= ke and ks <= e for ks, ke, _ in kept):
+            kept.append([s, e, lbl])
+    return kept
+
+
 def load_csv(csv_path: Path) -> List[Dict]:
     examples = []
+    empty = []
     with csv_path.open(encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
             review = row.get("ori_review", "").strip()
             if not review:
                 continue
+            tokens, token_spans = tokenize(review)
+            if not tokens:
+                continue
             minor_cell = row.get("minor_col", "").strip()
             gender_cell = row.get("gender_col", "").strip()
             if not minor_cell and not gender_cell:
-                continue
-            tokens, token_spans = tokenize(review)
-            if not tokens:
+                empty.append({"tokenized_text": tokens, "ner": []})
                 continue
             ner: List[List] = []
             for phrase in _parse_cell(minor_cell):
                 for cs, ce in _find_all_spans(review, phrase):
                     result = char_to_token_span(cs, ce, token_spans)
                     if result:
-                        ner.append([result[0], result[1], "MinorChild"])
+                        ner.append([result[0], result[1], "NonfictionalChildRelated"])
             for phrase in _parse_cell(gender_cell):
                 for cs, ce in _find_all_spans(review, phrase):
                     result = char_to_token_span(cs, ce, token_spans)
                     if result:
-                        ner.append([result[0], result[1], "GenderIndication"])
+                        ner.append([result[0], result[1], "AuthorGenderIndication"])
             if ner:
-                examples.append({"tokenized_text": tokens, "ner": ner})
-    return examples
+                examples.append({"tokenized_text": tokens, "ner": _resolve_overlaps(ner)})
+    n_empty = min(len(empty), len(examples))
+    return examples + empty[:n_empty]
 
 
 def compute_ner_metrics(
@@ -195,7 +209,7 @@ def _make_ner_callback(eval_data: List[Dict], labels: List[str], output_dir: Pat
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Train GLiNER on mydata.csv (MinorChild + GenderIndication)")
+    p = argparse.ArgumentParser(description="Train GLiNER on mydata.csv (NonfictionalChildRelated + AuthorGenderIndication)")
     p.add_argument("--model", default="EmergentMethods/gliner_medium_news-v2.1")
     p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--batch-size", type=int, default=8)
@@ -204,7 +218,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--val-split", type=float, default=0.1)
     p.add_argument("--csv", default=None, help="Path to mydata.csv (default: mydata.csv next to the script).")
-    p.add_argument("--minor-oversample", type=int, default=2)
+    p.add_argument("--minor-oversample", type=int, default=1)
     return p.parse_args()
 
 
@@ -218,11 +232,11 @@ def main() -> None:
 
     print(f"Loading {csv_path.name} …")
     csv_examples = load_csv(csv_path)
-    minor_count = sum(1 for ex in csv_examples if any(s[2] == "MinorChild" for s in ex["ner"]))
-    gender_count = sum(1 for ex in csv_examples if any(s[2] == "GenderIndication" for s in ex["ner"]))
-    print(f"  {len(csv_examples)} annotated examples  (MinorChild: {minor_count}, GenderIndication: {gender_count})")
+    minor_count = sum(1 for ex in csv_examples if any(s[2] == "NonfictionalChildRelated" for s in ex["ner"]))
+    gender_count = sum(1 for ex in csv_examples if any(s[2] == "AuthorGenderIndication" for s in ex["ner"]))
+    print(f"  {len(csv_examples)} annotated examples  (NonfictionalChildRelated: {minor_count}, AuthorGenderIndication: {gender_count})")
 
-    minor_csv = [ex for ex in csv_examples if any(s[2] == "MinorChild" for s in ex["ner"])]
+    minor_csv = [ex for ex in csv_examples if any(s[2] == "NonfictionalChildRelated" for s in ex["ner"])]
     all_examples = chunk_examples(csv_examples + minor_csv * args.minor_oversample)
     print(f"  {len(all_examples)} examples after chunking + oversampling")
 
