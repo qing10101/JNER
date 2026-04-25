@@ -144,7 +144,7 @@ def align_labels(examples, tokenizer):
 
 
 def compute_metrics(p):
-    from seqeval.metrics import f1_score, precision_score, recall_score
+    from seqeval.metrics import classification_report, f1_score, precision_score, recall_score
     logits, labels = p
     preds = np.argmax(logits, axis=2)
     true_lbls = [[LABEL_LIST[l] for l in row if l != -100] for row in labels]
@@ -152,11 +152,16 @@ def compute_metrics(p):
         [LABEL_LIST[pred] for pred, lbl in zip(pr, lb) if lbl != -100]
         for pr, lb in zip(preds, labels)
     ]
-    return {
+    report = classification_report(true_lbls, pred_lbls, output_dict=True, zero_division=0)
+    metrics = {
         "precision": precision_score(true_lbls, pred_lbls),
         "recall": recall_score(true_lbls, pred_lbls),
         "f1": f1_score(true_lbls, pred_lbls),
     }
+    for label in ALL_LABELS:
+        if label in report:
+            metrics[f"f1_{label}"] = report[label]["f1-score"]
+    return metrics
 
 
 def parse_args():
@@ -186,13 +191,15 @@ def main():
     gender_count = sum(1 for ex in csv_examples if any(s[2] == "AuthorGenderIndication" for s in ex["ner"]))
     print(f"  {len(csv_examples)} examples  (NonfictionalChildRelated: {minor_count}, AuthorGenderIndication: {gender_count})")
 
-    minor_csv = [ex for ex in csv_examples if any(s[2] == "NonfictionalChildRelated" for s in ex["ner"])]
-    all_examples = csv_examples + minor_csv * args.minor_oversample
     random.seed(args.seed)
-    random.shuffle(all_examples)
-    n_val = max(1, int(len(all_examples) * args.val_split))
-    train_data = all_examples[:-n_val]
-    eval_data = all_examples[-n_val:]
+    random.shuffle(csv_examples)
+    n_val = max(1, int(len(csv_examples) * args.val_split))
+    eval_data = csv_examples[-n_val:]
+    train_base = csv_examples[:-n_val]
+
+    minor_train = [ex for ex in train_base if any(s[2] == "NonfictionalChildRelated" for s in ex["ner"])]
+    train_data = train_base + minor_train * args.minor_oversample
+    random.shuffle(train_data)
     print(f"  Train: {len(train_data)}  |  Eval: {len(eval_data)}")
 
     print(f"\nLoading tokenizer: {args.model}")

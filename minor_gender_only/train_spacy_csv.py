@@ -141,14 +141,16 @@ def main() -> None:
     gender_count = sum(1 for _, ann in csv_data if any(e[2] == "AuthorGenderIndication" for e in ann["entities"]))
     print(f"  {len(csv_data)} annotated examples  (NonfictionalChildRelated: {minor_count}, AuthorGenderIndication: {gender_count})")
 
-    minor_data = [d for d in csv_data if any(e[2] == "NonfictionalChildRelated" for e in d[1]["entities"])]
-    gender_data = [d for d in csv_data if any(e[2] == "AuthorGenderIndication" for e in d[1]["entities"])]
-    all_data = csv_data + minor_data * args.minor_oversample + gender_data * args.gender_oversample
     random.seed(args.seed)
-    random.shuffle(all_data)
-    n_val = max(1, int(len(all_data) * args.val_split))
-    train_raw = all_data[:-n_val]
-    eval_raw = all_data[-n_val:]
+    random.shuffle(csv_data)
+    n_val = max(1, int(len(csv_data) * args.val_split))
+    eval_raw = csv_data[-n_val:]
+    train_base = csv_data[:-n_val]
+
+    minor_data = [d for d in train_base if any(e[2] == "NonfictionalChildRelated" for e in d[1]["entities"])]
+    gender_data = [d for d in train_base if any(e[2] == "AuthorGenderIndication" for e in d[1]["entities"])]
+    train_raw = train_base + minor_data * args.minor_oversample + gender_data * args.gender_oversample
+    random.shuffle(train_raw)
     print(f"  Train: {len(train_raw)}  |  Eval: {len(eval_raw)}")
 
     print(f"\nLoading spaCy model: {args.model}")

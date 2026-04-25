@@ -405,14 +405,17 @@ def main() -> None:
     gender_count = sum(1 for ex in csv_examples if any(s[2] == "AuthorGenderIndication" for s in ex["ner"]))
     print(f"  {len(csv_examples)} annotated examples  (NonfictionalChildRelated: {minor_count}, AuthorGenderIndication: {gender_count})")
 
-    minor_csv = [ex for ex in csv_examples if any(s[2] == "NonfictionalChildRelated" for s in ex["ner"])]
-    all_examples = chunk_examples(csv_examples + minor_csv * args.minor_oversample)
-    print(f"  {len(all_examples)} examples after chunking + oversampling")
+    all_chunked = chunk_examples(csv_examples)
+    print(f"  {len(all_chunked)} examples after chunking")
 
-    random.shuffle(all_examples)
-    n_val = max(1, int(len(all_examples) * args.val_split))
-    train_data = all_examples[:-n_val]
-    eval_data = all_examples[-n_val:]
+    random.shuffle(all_chunked)
+    n_val = max(1, int(len(all_chunked) * args.val_split))
+    eval_data = all_chunked[-n_val:]
+    train_base = all_chunked[:-n_val]
+
+    minor_train = [ex for ex in train_base if any(s[2] == "NonfictionalChildRelated" for s in ex["ner"])]
+    train_data = train_base + minor_train * args.minor_oversample
+    random.shuffle(train_data)
     print(f"  Train: {len(train_data)}  |  Eval: {len(eval_data)}")
 
     (output_dir / "train.json").write_text(json.dumps(train_data, indent=2))

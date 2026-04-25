@@ -4,17 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="58264430-28cb-4197-9cb1-a69df44db2e8" name="Changes" comment="add minor and gender only training">
+    <list default="true" id="58264430-28cb-4197-9cb1-a69df44db2e8" name="Changes" comment="new requirements files">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/minor_gender_only/evaluate_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/minor_gender_only/evaluate_csv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minor_gender_only/train_deberta_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/minor_gender_only/train_deberta_csv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minor_gender_only/train_flant5_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/minor_gender_only/train_flant5_csv.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/minor_gender_only/train_gliner_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/minor_gender_only/train_gliner_csv.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/minor_gender_only/train_llm_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/minor_gender_only/train_llm_csv.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/minor_gender_only/train_setfit_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/minor_gender_only/train_setfit_csv.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/minor_gender_only/train_spacy_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/minor_gender_only/train_spacy_csv.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/minor_gender_only/train_spanmarker_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/minor_gender_only/train_spanmarker_csv.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_gliner.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_llm.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_spacy.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_spanmarker.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -153,7 +151,23 @@
       <option name="project" value="LOCAL" />
       <updated>1776814049053</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="new training features and models">
+      <option name="closed" value="true" />
+      <created>1776987662918</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1776987662918</updated>
+    </task>
+    <task id="LOCAL-00012" summary="new requirements files">
+      <option name="closed" value="true" />
+      <created>1776987694210</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1776987694210</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -175,6 +189,8 @@
     <MESSAGE value="add llm training feature" />
     <MESSAGE value="training methodology update" />
     <MESSAGE value="add minor and gender only training" />
-    <option name="LAST_COMMIT_MESSAGE" value="add minor and gender only training" />
+    <MESSAGE value="new training features and models" />
+    <MESSAGE value="new requirements files" />
+    <option name="LAST_COMMIT_MESSAGE" value="new requirements files" />
   </component>
 </project>

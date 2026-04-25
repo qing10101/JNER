@@ -173,13 +173,15 @@ def main():
     gender_count = sum(1 for ex in csv_examples if ex["gold"]["AuthorGenderIndication"])
     print(f"  {len(csv_examples)} examples  (NonfictionalChildRelated: {minor_count}, AuthorGenderIndication: {gender_count})")
 
-    minor_csv = [ex for ex in csv_examples if ex["gold"]["NonfictionalChildRelated"]]
-    all_examples = csv_examples + minor_csv * args.minor_oversample
     random.seed(args.seed)
-    random.shuffle(all_examples)
-    n_val = max(1, int(len(all_examples) * args.val_split))
-    train_data = all_examples[:-n_val]
-    eval_data = all_examples[-n_val:]
+    random.shuffle(csv_examples)
+    n_val = max(1, int(len(csv_examples) * args.val_split))
+    eval_data = csv_examples[-n_val:]
+    train_base = csv_examples[:-n_val]
+
+    minor_train = [ex for ex in train_base if ex["gold"]["NonfictionalChildRelated"]]
+    train_data = train_base + minor_train * args.minor_oversample
+    random.shuffle(train_data)
     print(f"  Train: {len(train_data)}  |  Eval: {len(eval_data)}")
 
     print(f"\nBuilding span dataset (max {args.max_span_words} words per span) ...")
